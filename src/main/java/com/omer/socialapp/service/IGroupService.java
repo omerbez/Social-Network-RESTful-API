@@ -14,6 +14,7 @@ public interface IGroupService {
 	public Optional<Group> findById(long id);
 	public Group addGroup(Group group);
 	public List<Group> getAllGroups();
+	public List<Group> getAllGroups(String name, String descContains);
 	public List<User> getUsersOfGroup(long groupId);
 	public void removeGroup(long groupId);
 	public CollectionModel<EntityModel<IGroupLinksMethods>> toCollectionModel(Iterable<? extends IGroupLinksMethods> pages);

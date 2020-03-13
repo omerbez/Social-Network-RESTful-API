@@ -13,4 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long>, UserCustomRep
 	public User findByUsername(String username);
 	public List<User> findByLikedPages(AbstractPage page);
 	public List<User> findByGroups(Group group);
+	public List<User> findByDisplayNameContaining(String name);
+	public List<User> findByAge(Integer age);
+	public List<User> findByDisplayNameContainingAndAge(String name, Integer age);
 }

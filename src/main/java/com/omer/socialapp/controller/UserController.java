@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.omer.socialapp.dto.UserBasicDTO;
@@ -49,11 +50,13 @@ public class UserController
 	}
 	
 	@GetMapping("/users")
-	public ResponseEntity<CollectionModel<EntityModel<IUserLinksMethods>>> getAllUsers() {
-		var users = userService.getAllUsers()
-				.stream()
-				.map(user -> new UserBasicDTO(user))
-				.collect(Collectors.toList());	
+	public ResponseEntity<CollectionModel<EntityModel<IUserLinksMethods>>> getAllUsers(
+			@RequestParam(name = "name", required = false) String nameLike,
+			@RequestParam(name = "age", required = false) Integer age) {
+		var users = userService.getAllUsers(nameLike, age)
+					.stream()
+					.map(user -> new UserBasicDTO(user))
+					.collect(Collectors.toList());	
 		
 		return ResponseEntity.ok()
 				.cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES))

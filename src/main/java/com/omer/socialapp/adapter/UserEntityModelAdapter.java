@@ -21,11 +21,11 @@ public class UserEntityModelAdapter implements SimpleRepresentationModelAssemble
 			return;
 		
 		resource.add(linkTo(methodOn(UserController.class).getSingleUser(resource.getContent().getId())).withSelfRel());
-		resource.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
+		resource.add(linkTo(methodOn(UserController.class).getAllUsers(null, null)).withRel("users"));
 	}
 
 	@Override
 	public void addLinks(CollectionModel<EntityModel<IUserLinksMethods>> resources) {
-		resources.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));	
+		resources.add(linkTo(methodOn(UserController.class).getAllUsers(null, null)).withRel("users"));	
 	}
 }

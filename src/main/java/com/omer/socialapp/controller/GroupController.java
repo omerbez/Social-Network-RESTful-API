@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.omer.socialapp.dto.GroupBasicDTO;
@@ -46,8 +47,10 @@ public class GroupController
 	}
 	
 	@GetMapping("/groups")
-	public ResponseEntity<CollectionModel<EntityModel<IGroupLinksMethods>>> getAllGroups() {
-		var body = groupService.toCollectionModel(groupService.getAllGroups()
+	public ResponseEntity<CollectionModel<EntityModel<IGroupLinksMethods>>> getAllGroups(
+			@RequestParam(name = "name", required = false) String name,
+			@RequestParam(name = "desc", required = false) String desc) {
+		var body = groupService.toCollectionModel(groupService.getAllGroups(name, desc)
 						.stream()
 						.map(GroupBasicDTO::new)
 						.collect(Collectors.toList()));

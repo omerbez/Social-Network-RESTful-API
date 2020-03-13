@@ -1,5 +1,6 @@
 package com.omer.socialapp.repository;
 
+
 import com.omer.socialapp.model.User;
 
 // Custom methods which couldn't implemented via @Query 

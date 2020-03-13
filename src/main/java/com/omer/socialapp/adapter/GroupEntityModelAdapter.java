@@ -20,11 +20,11 @@ public class GroupEntityModelAdapter implements SimpleRepresentationModelAssembl
 			return;
 		
 		resource.add(linkTo(methodOn(GroupController.class).getGroup(resource.getContent().getId())).withSelfRel());
-		resource.add(linkTo(methodOn(GroupController.class).getAllGroups()).withRel("groups"));
+		resource.add(linkTo(methodOn(GroupController.class).getAllGroups(null, null)).withRel("groups"));
 	}
 
 	@Override
 	public void addLinks(CollectionModel<EntityModel<IGroupLinksMethods>> resources) {
-		resources.add(linkTo(methodOn(GroupController.class).getAllGroups()).withRel("groups"));	
+		resources.add(linkTo(methodOn(GroupController.class).getAllGroups(null, null)).withRel("groups"));	
 	}
 }

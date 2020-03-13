@@ -15,6 +15,7 @@ public interface IUserService {
 	public User addUser(User user);
 	public List<User> getAllUsers();
 	public Optional<User> findById(long id);
+	public List<User> getAllUsers(String name, Integer age);
 	public boolean isExists(long uid);
 	public void deleteUser(long uid);
 	public User updateUser(User existsUser, User newUser);

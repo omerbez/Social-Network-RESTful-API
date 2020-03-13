@@ -1,8 +1,11 @@
 package com.omer.socialapp;
 
 
+
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 import com.omer.socialapp.adapter.UserEntityModelAdapter;
@@ -22,5 +25,15 @@ public class RestSocialAppFinalProjectApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(RestSocialAppFinalProjectApplication.class, args);
 	}
-
+	
+	@Bean 
+	public CommandLineRunner init(UserRepository userRepository) {
+		return new CommandLineRunner() {
+			@Override
+			public void run(String... args) throws Exception {
+//				User user1 = new User("Omer Bezalel", "user123", "pass123", "email@gmail.com", 28);
+//				userRepository.save(user1);
+			}
+		};
+	}
 }

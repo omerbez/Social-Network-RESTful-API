@@ -138,4 +138,18 @@ public class UserService implements IUserService
 		User user = userRepository.findById(uid).orElseThrow(() -> new UserNotFoundException(uid));
 		return groupRepository.findByGroupUsers(user);
 	}
+
+	@Override
+	public List<User> getAllUsers(String name, Integer age) {
+		if(name == null && age == null)
+			return getAllUsers();
+		
+		if(name != null && age != null)
+			return userRepository.findByDisplayNameContainingAndAge(name, age);
+		
+		if(name != null)
+			return userRepository.findByDisplayNameContaining(name);
+		
+		return userRepository.findByAge(age);
+	}
 }

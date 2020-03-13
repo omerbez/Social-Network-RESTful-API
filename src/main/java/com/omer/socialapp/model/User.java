@@ -96,11 +96,13 @@ public class User implements IUserLinksMethods
 	private Set<Comment> comments;
 	
 	
-	public User(String displayname, String username, String password) {
+	public User(String displayname, String username, String password, String email, int age) {
 		Assert.noNullElements(new Object[] {displayname, username, password}, "Null values are illegal");
 		this.displayName = displayname;
 		this.username = username;
 		this.password = password;
+		this.email = email;
+		this.age = age;
 		addedFriendsList = new HashSet<>();
 		addedByFriendsList = new HashSet<>();
 	}

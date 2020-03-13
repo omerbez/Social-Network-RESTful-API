@@ -83,4 +83,18 @@ public class GroupService implements IGroupService
 		}
 		groupRepository.delete(group);
 	}
+
+	@Override
+	public List<Group> getAllGroups(String name, String descContains) {
+		if(name == null && descContains == null)
+			return getAllGroups();
+		
+		if(name != null && descContains != null)
+			return groupRepository.findByGroupNameLikeAndDescriptionContaining(name, descContains);
+		
+		if(name != null)
+			return groupRepository.findByGroupNameLike(name);
+		
+		return groupRepository.findByDescriptionContaining(descContains);
+	}
 }
