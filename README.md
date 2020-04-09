@@ -4,3 +4,4 @@ and includes Users, Groups, Pages, Posts, and Comments Entities.
 Technologies: Java8, Spring boot (Spring Data JPA, HATEOES, REST, Hibernate..), MySQL DB.
 
 ![Alt text](doc/diagram.png?raw=true "Architecture Diagram")
+
