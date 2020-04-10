@@ -1,5 +1,6 @@
 package com.omer.socialapp.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor //For Hibernate..
 public class PostOfGroup extends AbstractPost implements IPostLinksMethods
 {
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JsonIgnore
 	@JoinColumn(name = "group_id")
 	private Group relatedGroup;

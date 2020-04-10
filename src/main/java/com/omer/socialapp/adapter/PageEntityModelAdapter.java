@@ -9,6 +9,7 @@ import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
 import com.omer.socialapp.controller.PageController;
+import com.omer.socialapp.controller.PostController;
 import com.omer.socialapp.model.IPageLinksMethods;
 
 @Component
@@ -19,7 +20,9 @@ public class PageEntityModelAdapter implements SimpleRepresentationModelAssemble
 		if(resource == null || resource.getContent() == null)
 			return;
 		
-		resource.add(linkTo(methodOn(PageController.class).getPage(resource.getContent().getId())).withSelfRel());
+		long id = resource.getContent().getId();
+		resource.add(linkTo(methodOn(PageController.class).getPage(id)).withSelfRel());
+		resource.add(linkTo(methodOn(PostController.class).getAllPagePosts(id)).withRel("pagePosts"));
 		resource.add(linkTo(methodOn(PageController.class).getAllPages()).withRel("pages"));
 	}
 

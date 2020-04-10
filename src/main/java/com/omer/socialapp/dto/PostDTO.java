@@ -25,13 +25,9 @@ public class PostDTO implements IPostLinksMethods
 	@EqualsAndHashCode.Exclude @ToString.Exclude
 	private AbstractPost post;
 	
-	@JsonIgnore
-	private long subjectId; // page or group id..
 	
-	
-	public PostDTO(AbstractPost post, long subjectId) {
+	public PostDTO(AbstractPost post) {
 		this.post = post;
-		this.subjectId = subjectId;
 	}
 	
 	public String getText() {
@@ -56,6 +52,6 @@ public class PostDTO implements IPostLinksMethods
 	@Override
 	@JsonIgnore
 	public Long getSubjectId() {
-		return subjectId;
+		return post.getSubjectId();
 	}
 }

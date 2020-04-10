@@ -3,6 +3,7 @@ package com.omer.socialapp.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
@@ -40,16 +41,16 @@ public abstract class AbstractPost
 	
 	@JsonIgnore
 	@Setter(AccessLevel.NONE)
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "user_id", nullable = false)
 	@EqualsAndHashCode.Exclude @ToString.Exclude
 	private User postedUser;
 	
 	@Setter(AccessLevel.NONE)
-	@OneToMany(mappedBy = "relatedPost")
+	@OneToMany(mappedBy = "relatedPost", cascade = CascadeType.ALL)
 	@EqualsAndHashCode.Exclude @ToString.Exclude
 	private List<Comment> comments;
-	
+
 	
 	public AbstractPost(String text, User postedUser) {
 		this.text = text;
@@ -59,4 +60,10 @@ public abstract class AbstractPost
 	public void addComment(Comment c) {
 		comments.add(c);
 	}
+	
+	// delegate the implementation..
+	/**
+	 * @return the associate Page/Group ID
+	 */
+	public abstract Long getSubjectId();
 }

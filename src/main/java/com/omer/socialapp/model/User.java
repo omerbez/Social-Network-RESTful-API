@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -51,7 +52,8 @@ public class User implements IUserLinksMethods
 	@Setter(value = AccessLevel.NONE)
 	@Getter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude @ToString.Exclude
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, 
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinTable(name="friends_table",
 	   joinColumns = @JoinColumn(name="user_id", referencedColumnName="id"),
 	   inverseJoinColumns = @JoinColumn(name="friend_id", referencedColumnName="id"))
@@ -62,19 +64,21 @@ public class User implements IUserLinksMethods
 	@Setter(value = AccessLevel.NONE)
 	@Getter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude @ToString.Exclude
-	@ManyToMany(mappedBy = "addedFriendsList", fetch = FetchType.LAZY)
+	@ManyToMany(mappedBy = "addedFriendsList", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, 
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	private Set<User> addedByFriendsList;
 	
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude @ToString.Exclude
-	@OneToMany(mappedBy = "postedUser")
+	@OneToMany(mappedBy = "postedUser", cascade = CascadeType.ALL)
 	private Set<AbstractPost> posts;
 	
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude @ToString.Exclude
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, 
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinTable(name="pages_likes",
 	   joinColumns = @JoinColumn(name="user_id", referencedColumnName="id"),
 	   inverseJoinColumns = @JoinColumn(name="page_id", referencedColumnName="id"))
@@ -83,7 +87,8 @@ public class User implements IUserLinksMethods
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude @ToString.Exclude
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, 
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinTable(name="users_groups", 
 	   joinColumns = @JoinColumn(name="user_id", referencedColumnName="id"),
 	   inverseJoinColumns = @JoinColumn(name="group_id", referencedColumnName="id"))
@@ -92,7 +97,7 @@ public class User implements IUserLinksMethods
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude @ToString.Exclude
-	@OneToMany(mappedBy = "commentedUser")
+	@OneToMany(mappedBy = "commentedUser", cascade = CascadeType.ALL)
 	private Set<Comment> comments;
 	
 	
@@ -167,7 +172,10 @@ public class User implements IUserLinksMethods
 	@PreRemove 
 	//will be called before removed and with opened Transaction! so all changes  will applied to the DB
 	private void removeFromFriends() {
+		//remove the associate connections before delete
 		addedFriendsList.forEach(user -> user.removeFriend(this));
 		addedByFriendsList.forEach(user -> user.removeFriend(this));
+		likedPages.clear();
+		groups.clear();
 	}
 }

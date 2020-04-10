@@ -2,6 +2,7 @@ package com.omer.socialapp.model;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -30,14 +31,14 @@ public class Comment implements ICommentLinksMethods
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
 	@Setter(AccessLevel.NONE)
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "post_id", nullable = false)
 	private AbstractPost relatedPost;
 	
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
 	@Setter(AccessLevel.NONE)
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "user_id", nullable = false)
 	private User commentedUser;
 	

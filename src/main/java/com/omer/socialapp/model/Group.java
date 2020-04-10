@@ -2,6 +2,7 @@ package com.omer.socialapp.model;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -37,13 +38,14 @@ public class Group
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
 	@Setter(value = AccessLevel.NONE)
-	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "groups")
+	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "groups", cascade = {CascadeType.PERSIST, 
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	private Set<User> groupUsers;
 	
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
 	@Setter(value = AccessLevel.NONE)
-	@OneToMany(mappedBy = "relatedGroup")
+	@OneToMany(mappedBy = "relatedGroup", cascade = CascadeType.ALL)
 	private Set<PostOfGroup> groupPosts;
 	
 	

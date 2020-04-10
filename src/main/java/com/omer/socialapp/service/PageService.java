@@ -76,7 +76,7 @@ public class PageService implements IPageService
 	}
 
 	@Override
-	@Transactional //For "all or none" DB writes + the returned entity will be in managed state.
+	@Transactional
 	public void removePage(long pageId) {
 		var page = findById(pageId).orElseThrow(() -> new PageNotFoundException(pageId));
 		Set<User> likedUsers = page.getLikedUsers();

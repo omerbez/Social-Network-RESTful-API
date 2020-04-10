@@ -8,6 +8,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
+import com.omer.socialapp.controller.CommentController;
 import com.omer.socialapp.controller.PostController;
 import com.omer.socialapp.model.IPostLinksMethods;
 
@@ -21,6 +22,7 @@ public class PagePostEntityModelAdapter implements SimpleRepresentationModelAsse
 		
 		IPostLinksMethods post = resource.getContent();
 		resource.add(linkTo(methodOn(PostController.class).getPost(post.getPostId())).withSelfRel());
+		resource.add(linkTo(methodOn(CommentController.class).getCommentsOfPost(post.getSubjectId())).withRel("postComments"));
 		resource.add(linkTo(methodOn(PostController.class).getAllPagePosts(post.getSubjectId())).withRel("allPagePosts"));
 		resource.add(linkTo(methodOn(PostController.class)
 				.getAllUserPagePosts(post.getSubjectId(), post.getUserId()))

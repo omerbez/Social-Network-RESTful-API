@@ -72,15 +72,18 @@ public class GroupService implements IGroupService
 	}
 
 	@Override
-	@Transactional //For "all or none" DB writes + the returned entity will be in managed state.
+	@Transactional
 	public void removeGroup(long groupId) {
 		var group = findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+		
+		// remove the connection between the users and the group
 		Set<User> groupUsers = group.getGroupUsers();
 		if(groupUsers != null) {
 			for(User user : groupUsers) {
 				user.removeGroup(group);
 			}
 		}
+		// delete the group and cascade the operation to it's posts and comments
 		groupRepository.delete(group);
 	}
 

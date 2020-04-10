@@ -84,7 +84,7 @@ public class UserService implements IUserService
 	}
 
 	@Override
-	@Transactional //for "all or nothing" DB commits
+	@Transactional
 	public User updateUser(User existsUser, User newUser) {
 		Assert.noNullElements(new Object[] {existsUser, newUser}, "Illegal user info");
 		if(newUser.getUsername() != null) {

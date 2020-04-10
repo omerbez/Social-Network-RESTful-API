@@ -8,6 +8,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
+import com.omer.socialapp.controller.PostController;
 import com.omer.socialapp.controller.UserController;
 import com.omer.socialapp.model.IUserLinksMethods;
 
@@ -21,6 +22,7 @@ public class UserEntityModelAdapter implements SimpleRepresentationModelAssemble
 			return;
 		
 		resource.add(linkTo(methodOn(UserController.class).getSingleUser(resource.getContent().getId())).withSelfRel());
+		resource.add(linkTo(methodOn(PostController.class).getUserPosts(resource.getContent().getId())).withRel("userPosts"));
 		resource.add(linkTo(methodOn(UserController.class).getAllUsers(null, null)).withRel("users"));
 	}
 

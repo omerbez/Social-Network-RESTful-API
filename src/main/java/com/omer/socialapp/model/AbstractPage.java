@@ -2,6 +2,7 @@ package com.omer.socialapp.model;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -35,12 +36,13 @@ public abstract class AbstractPage implements IPageLinksMethods
 	
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
-	@ManyToMany(mappedBy = "likedPages")
+	@ManyToMany(mappedBy = "likedPages", cascade = {CascadeType.PERSIST, 
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	private Set<User> likedUsers;
 	
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
-	@OneToMany(mappedBy = "relatedPage")
+	@OneToMany(mappedBy = "relatedPage", cascade = CascadeType.ALL)
 	private Set<PostOfPage> pagePosts;
 	
 	

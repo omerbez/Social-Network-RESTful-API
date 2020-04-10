@@ -1,5 +1,6 @@
 package com.omer.socialapp.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor //For Hibernate..
 public class PostOfPage extends AbstractPost implements IPostLinksMethods
 {
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "page_id")
 	@JsonIgnore
 	private AbstractPage relatedPage;

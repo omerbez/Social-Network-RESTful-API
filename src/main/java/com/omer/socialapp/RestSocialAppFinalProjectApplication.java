@@ -31,7 +31,7 @@ public class RestSocialAppFinalProjectApplication {
 		return new CommandLineRunner() {
 			@Override
 			public void run(String... args) throws Exception {
-//				User user1 = new User("Omer Bezalel", "user123", "pass123", "email@gmail.com", 28);
+//				User user1 = new User("Omer Bezalel", "user123", "pass123", "email@gmail.com", 28);	
 //				userRepository.save(user1);
 			}
 		};

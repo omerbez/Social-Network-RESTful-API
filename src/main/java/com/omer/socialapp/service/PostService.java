@@ -1,7 +1,7 @@
 package com.omer.socialapp.service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
@@ -9,6 +9,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.omer.socialapp.adapter.AbstractPostEntityModelAdapter;
 import com.omer.socialapp.adapter.GroupPostEntityModelAdapter;
 import com.omer.socialapp.adapter.PagePostEntityModelAdapter;
 import com.omer.socialapp.exceptions.GeneralException;
@@ -38,17 +39,20 @@ public class PostService implements IPostService
 	private GroupRepository groupRepository;
 	private PagePostEntityModelAdapter pagePostEntityAdapter;
 	private GroupPostEntityModelAdapter groupPostEntityAdapter;
+	private AbstractPostEntityModelAdapter abstractPostEntityAdapter; //for user entire posts
 	
 	
 	@Autowired
 	public PostService(PostRepository postRepo, PageRepository pageRepo, UserRepository userRepo, 
-			PagePostEntityModelAdapter pageEntityAdapter, GroupRepository groupRepository, GroupPostEntityModelAdapter groupPostEntityAdapter) {
+			PagePostEntityModelAdapter pageEntityAdapter, GroupRepository groupRepository, GroupPostEntityModelAdapter groupPostEntityAdapter,
+			AbstractPostEntityModelAdapter abstractPostEntityAdapter) {
 		postRepository = postRepo;
 		pageRepository = pageRepo;
 		userRepository = userRepo;
 		pagePostEntityAdapter = pageEntityAdapter;
 		this.groupRepository = groupRepository;
 		this.groupPostEntityAdapter = groupPostEntityAdapter;
+		this.abstractPostEntityAdapter = abstractPostEntityAdapter;
 	}
 	
 	@Override
@@ -76,8 +80,9 @@ public class PostService implements IPostService
 	@Override
 	public CollectionModel<EntityModel<IPostLinksMethods>> toCollectionModel(Iterable<? extends IPostLinksMethods> posts, EntityPostType type) {
 		Assert.notNull(posts, "Post resources must not be null");
-		return type == EntityPostType.POST_OF_PAGE ? 
-				pagePostEntityAdapter.toCollectionModel(posts) : groupPostEntityAdapter.toCollectionModel(posts);
+		return type == EntityPostType.POST_OF_PAGE ? pagePostEntityAdapter.toCollectionModel(posts) 
+				: type == EntityPostType.POST_OF_GROUP ? groupPostEntityAdapter.toCollectionModel(posts)
+						: abstractPostEntityAdapter.toCollectionModel(posts);
 	}
 
 	@Override
@@ -102,18 +107,6 @@ public class PostService implements IPostService
 	@Override
 	public AbstractPost getPost(long postId) {
 		return postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
-	}
-
-	@Override
-	public Optional<Long> getPostSubjectId(long postId) {
-		if(!postRepository.existsById(postId))
-			throw new PostNotFoundException(postId);
-		
-		String type = postRepository.getPostType(postId);
-		if(type.equals(PostOfPage.DISCRIMINATOR_VALUE))
-			return postRepository.getPageIdOfPost(postId);
-		
-		return postRepository.getGroupIdOfPost(postId);
 	}
 
 	@Override
@@ -157,5 +150,21 @@ public class PostService implements IPostService
 		
 		String type = postRepository.getPostType(postId);
 		return type.equals(PostOfGroup.DISCRIMINATOR_VALUE) ? EntityPostType.POST_OF_PAGE : EntityPostType.POST_OF_GROUP;
+	}
+
+	@Override
+	public List<AbstractPost> getUserPosts(long userId) {	
+		User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+		List<AbstractPost> result = new ArrayList<>();
+		
+		for(Group group : user.getGroups()) {
+			result.addAll(getUserPostsOfGroup(group.getId(), userId));
+		}
+		
+		for(AbstractPage page : user.getLikedPages()) {
+			result.addAll(getUserPostsOfPage(page.getId(), userId));
+		}
+		
+		return result;
 	}
 }

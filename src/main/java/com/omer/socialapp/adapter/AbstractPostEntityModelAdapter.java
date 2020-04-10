@@ -13,7 +13,7 @@ import com.omer.socialapp.controller.PostController;
 import com.omer.socialapp.model.IPostLinksMethods;
 
 @Component
-public class GroupPostEntityModelAdapter implements SimpleRepresentationModelAssembler<IPostLinksMethods>
+public class AbstractPostEntityModelAdapter implements SimpleRepresentationModelAssembler<IPostLinksMethods>
 {
 	@Override
 	public void addLinks(EntityModel<IPostLinksMethods> resource) {
@@ -23,14 +23,13 @@ public class GroupPostEntityModelAdapter implements SimpleRepresentationModelAss
 		IPostLinksMethods post = resource.getContent();
 		resource.add(linkTo(methodOn(PostController.class).getPost(post.getPostId())).withSelfRel());
 		resource.add(linkTo(methodOn(CommentController.class).getCommentsOfPost(post.getSubjectId())).withRel("postComments"));
-		resource.add(linkTo(methodOn(PostController.class).getAllGroupPosts(post.getSubjectId())).withRel("allGroupPosts"));
 		resource.add(linkTo(methodOn(PostController.class)
-				.getAllUserGroupPosts(post.getSubjectId(), post.getUserId()))
-				.withRel("UserGroupPosts"));
+				.getUserPosts(post.getUserId()))
+				.withRel("UserPosts"));
 	}
 
 	@Override
 	public void addLinks(CollectionModel<EntityModel<IPostLinksMethods>> resources) {
-		// Post must be related to some subject..
+		// Post must be related to some subject/user..
 	}
 }

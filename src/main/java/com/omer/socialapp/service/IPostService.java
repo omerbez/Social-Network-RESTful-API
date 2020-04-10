@@ -1,7 +1,6 @@
 package com.omer.socialapp.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -20,13 +19,12 @@ public interface IPostService {
 	public List<PostOfGroup> getUserPostsOfGroup(long groupId, long userId);
 	public List<PostOfPage> getAllPostsOfPage(long pageId);
 	public List<PostOfGroup> getAllPostsOfGroup(long groupId);
-	public Optional<Long> getPostSubjectId(long postId);
 	public EntityPostType getPostType(long postId);
 	public EntityModel<IPostLinksMethods> toEntityModel(IPostLinksMethods post, EntityPostType type);
 	public CollectionModel<EntityModel<IPostLinksMethods>> toCollectionModel(Iterable<? extends IPostLinksMethods> posts, EntityPostType type);
-	
+	public List<AbstractPost> getUserPosts(long uid);
 	
 	public static enum EntityPostType {
-		POST_OF_PAGE, POST_OF_GROUP;
+		POST_OF_PAGE, POST_OF_GROUP, ABSTRACT_POST;
 	}
 }

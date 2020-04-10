@@ -40,19 +40,30 @@ public class PostController
 	@GetMapping("/posts/{postId}")
 	public ResponseEntity<EntityModel<IPostLinksMethods>> getPost(@PathVariable long postId) {
 		AbstractPost post = postService.getPost(postId);
-		long subjectId = postService.getPostSubjectId(postId).orElseThrow(() -> new RuntimeException("Couldn't find post's subject"));
 		EntityPostType postType = postService.getPostType(postId);
 		
 		return ResponseEntity.ok()
 				.cacheControl(CacheControl.maxAge(60, TimeUnit.MINUTES))
-				.body(postService.toEntityModel(new PostDTO(post, subjectId), postType));
+				.body(postService.toEntityModel(new PostDTO(post), postType));
+	}
+	
+	@GetMapping("users/{uid}/posts")
+	public ResponseEntity<CollectionModel<EntityModel<IPostLinksMethods>>> getUserPosts(@PathVariable long uid) {
+		var posts = postService.getUserPosts(uid)
+				.stream()
+				.map(post -> new PostDTO(post))
+				.collect(Collectors.toList());
+		
+		return ResponseEntity.ok()
+				.cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES))
+				.body(postService.toCollectionModel(posts, EntityPostType.ABSTRACT_POST));
 	}
 	
 	@GetMapping("/pages/{pageId}/posts")
 	public ResponseEntity<CollectionModel<EntityModel<IPostLinksMethods>>> getAllPagePosts(@PathVariable long pageId) {
 		var posts = postService.getAllPostsOfPage(pageId)
 				.stream()
-				.map(post -> new PostDTO(post, pageId))
+				.map(post -> new PostDTO(post))
 				.collect(Collectors.toList());
 		
 		return ResponseEntity.ok()
@@ -65,7 +76,7 @@ public class PostController
 				getAllUserPagePosts(@PathVariable long pageId, @PathVariable long userId) {
 		var posts = postService.getUserPostsOfPage(pageId, userId)
 				.stream()
-				.map(post -> new PostDTO(post, pageId))
+				.map(post -> new PostDTO(post))
 				.collect(Collectors.toList());
 		
 		return ResponseEntity.ok()
@@ -79,14 +90,14 @@ public class PostController
 		URI selfUri = linkTo(methodOn(PostController.class).getPost(post.getId())).toUri();
 		
 		return ResponseEntity.created(selfUri)
-				.body(postService.toEntityModel(new PostDTO(post, pageId), EntityPostType.POST_OF_PAGE));
+				.body(postService.toEntityModel(new PostDTO(post), EntityPostType.POST_OF_PAGE));
 	}
 	
 	@GetMapping("/groups/{groupId}/posts")
 	public ResponseEntity<CollectionModel<EntityModel<IPostLinksMethods>>> getAllGroupPosts(@PathVariable long groupId) {
 		var posts = postService.getAllPostsOfGroup(groupId)
 				.stream()
-				.map(post -> new PostDTO(post, groupId))
+				.map(post -> new PostDTO(post))
 				.collect(Collectors.toList());
 		
 		return ResponseEntity.ok()
@@ -99,7 +110,7 @@ public class PostController
 					getAllUserGroupPosts(@PathVariable long groupId, @PathVariable long userId) {
 		var posts = postService.getUserPostsOfGroup(groupId, userId)
 				.stream()
-				.map(post -> new PostDTO(post, groupId))
+				.map(post -> new PostDTO(post))
 				.collect(Collectors.toList());
 		
 		return ResponseEntity.ok()
@@ -113,6 +124,6 @@ public class PostController
 		URI selfUri = linkTo(methodOn(PostController.class).getPost(post.getId())).toUri();
 		
 		return ResponseEntity.created(selfUri)
-				.body(postService.toEntityModel(new PostDTO(post, groupId), EntityPostType.POST_OF_GROUP));
+				.body(postService.toEntityModel(new PostDTO(post), EntityPostType.POST_OF_GROUP));
 	}
 }
