@@ -1,7 +1,8 @@
-Spring boot application which expose RESTful API will all the REST guidlines,
-The application was designed and built by 4 layers architecture (Presentation, Business, Persistence, and Database layers)
-and includes Users, Groups, Pages, Posts, and Comments Entities.
-Technologies: Java8, Spring boot (Spring Data JPA, HATEOES, REST, Hibernate..), MySQL DB.
+Spring boot application which expose RESTful API with all the REST guidlines.
+The purpose of the application is to manage and demonstrate a Social Network which contains users,
+pages, groups, posts and comments with a fully persistence, while preserving SOLID principles.  
+Architecture: 4 layers architecture (Presentation, Business, Persistence, and Database layers)
+Technologies: Java8, Spring boot (Spring Data JPA, HATEOES, REST, Hibernate), MySQL DB.
 
 ![Alt text](doc/diagram.png?raw=true "Architecture Diagram")
 
