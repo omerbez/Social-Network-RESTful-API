@@ -9,7 +9,7 @@ public class ErrorMessage
 	@JsonProperty("time")
 	private LocalDateTime time;
 	
-	@JsonProperty("errorMsg")
+	@JsonProperty("error")
 	private String message;
 	
 	public ErrorMessage(String msg) {

@@ -72,7 +72,7 @@ public class GroupService implements IGroupService
 	}
 
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void removeGroup(long groupId) {
 		var group = findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
 		

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class Identifier<ID> {
+	
 	@JsonProperty("id")
 	private ID id;
 	

@@ -3,13 +3,18 @@ package com.omer.socialapp.model;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,14 +31,20 @@ import lombok.ToString;
 @NoArgsConstructor //For Hibernate
 public class Group 
 {	
-	@Id @GeneratedValue
+	@Id 
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotNull(message = "Group name is mandatory")
+	@Size(min = 4, max = 12, message = "Group name length must be between 4 to 12")
+	@Pattern(regexp = "\\w+( \\w)*", message = "Illegal group name")
 	@EqualsAndHashCode.Exclude
+	@Column(name = "group_name", nullable = false)
 	private String groupName;
 	
 	@EqualsAndHashCode.Exclude
-	private String description;
+	@Column(nullable = false)
+	private String description = ""; // default value..
 	
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
@@ -51,6 +62,7 @@ public class Group
 	
 	public Group(String groupName, String description) {
 		this.groupName = groupName;
-		this.description = description;
+		if(description != null)
+			this.description = description;
 	}
 }

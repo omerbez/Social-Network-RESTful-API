@@ -1,5 +1,7 @@
 package com.omer.socialapp.dto;
 
+import java.time.LocalDate;
+
 import org.springframework.hateoas.server.core.Relation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -17,7 +19,7 @@ import lombok.Value;
 @Relation(collectionRelation = "usersList", itemRelation = "user") 
 @Value
 @JsonPropertyOrder(value = {"id", "displayName", "email", "age"})
-public class UserBasicDTO implements IUserLinksMethods 
+public class UserBasicDTO implements IUserLinksMethods
 {
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
@@ -27,7 +29,6 @@ public class UserBasicDTO implements IUserLinksMethods
 		this.user = user;
 	}
 	
-	@Override
 	public Long getId() {
 		return user.getId();
 	}
@@ -40,7 +41,7 @@ public class UserBasicDTO implements IUserLinksMethods
 		return user.getEmail();
 	}
 	
-	public int getAge() {
-		return user.getAge();
+	public LocalDate getDateOfBirth() {
+		return user.getDateOfBirth();
 	}
 }

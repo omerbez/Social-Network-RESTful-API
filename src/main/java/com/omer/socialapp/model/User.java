@@ -1,6 +1,8 @@
 package com.omer.socialapp.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,16 +11,21 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.PreRemove;
-
-import org.springframework.util.Assert;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.omer.socialapp.service.ValidationService.Password;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -33,21 +40,44 @@ import lombok.ToString;
 @NoArgsConstructor
 public class User implements IUserLinksMethods
 {
-	@Id @GeneratedValue
+	@Id 
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotNull(message = "Display name is mandatory")
+	@Column(name = "display_name", nullable = false)
+	@Size(min = 3, max = 15, message = "Display name length must be 3 to 15")
+	@Pattern(regexp = "\\w+( \\w+)*", message = "Illegal display name")
 	private String displayName;
 	
-	@Column(unique = true)
+	@NotNull(message = "Username is mandatory")
+	@Column(unique = true, nullable = false)
+	@Size(min = 4, max = 12, message = "Username length must be between 4 to 12")
+	@Pattern(regexp = "\\w+", message = "Illegal username (no whitespaces allowed")
 	private String username;
 	
+	@NotNull(message = "Password is mandatory")
+	@Column(nullable = false)
+	@Password(min = 8, max = 15, message = "Illegal password")
 	private String password;
 	
+	@Column(nullable = false)
+	@Email(message = "Illegal email address")
+	@NotNull(message = "Email is mandatory")
 	private String email;
 	
-	private Integer age;
+	@Column(name = "date_of_birth", nullable = false)
+	@Past
+	private LocalDate dateOfBirth;
 	
+	@Column(name = "creation_date", nullable = false)
 	private final LocalDateTime creationDate = LocalDateTime.now();
+	
+	@JsonIgnore
+	@EqualsAndHashCode.Exclude @ToString.Exclude
+	@Setter(AccessLevel.NONE)
+	// calculated from dateOfBirth, should also be in the DB for queries pruporse..
+	private int age;  
 	
 	@Setter(value = AccessLevel.NONE)
 	@Getter(value = AccessLevel.NONE)
@@ -70,13 +100,15 @@ public class User implements IUserLinksMethods
 	
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
-	@EqualsAndHashCode.Exclude @ToString.Exclude
+	@EqualsAndHashCode.Exclude 
+	@ToString.Exclude
 	@OneToMany(mappedBy = "postedUser", cascade = CascadeType.ALL)
 	private Set<AbstractPost> posts;
 	
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
-	@EqualsAndHashCode.Exclude @ToString.Exclude
+	@EqualsAndHashCode.Exclude 
+	@ToString.Exclude
 	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, 
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinTable(name="pages_likes",
@@ -86,7 +118,8 @@ public class User implements IUserLinksMethods
 	
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
-	@EqualsAndHashCode.Exclude @ToString.Exclude
+	@EqualsAndHashCode.Exclude 
+	@ToString.Exclude
 	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, 
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinTable(name="users_groups", 
@@ -96,20 +129,22 @@ public class User implements IUserLinksMethods
 	
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
-	@EqualsAndHashCode.Exclude @ToString.Exclude
+	@EqualsAndHashCode.Exclude 
+	@ToString.Exclude
 	@OneToMany(mappedBy = "commentedUser", cascade = CascadeType.ALL)
 	private Set<Comment> comments;
 	
 	
-	public User(String displayname, String username, String password, String email, int age) {
-		Assert.noNullElements(new Object[] {displayname, username, password}, "Null values are illegal");
+	public User(String displayname, String username, String password, String email, LocalDate dateOfBirth) {
 		this.displayName = displayname;
 		this.username = username;
 		this.password = password;
 		this.email = email;
-		this.age = age;
-		addedFriendsList = new HashSet<>();
-		addedByFriendsList = new HashSet<>();
+		this.dateOfBirth = dateOfBirth;
+		
+		// calculate the age..
+		Period p = Period.between(LocalDate.now(), dateOfBirth);
+		age = p.getYears();
 	}
 	
 	

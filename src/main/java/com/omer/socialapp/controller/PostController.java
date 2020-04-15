@@ -7,10 +7,15 @@ import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,18 +28,22 @@ import com.omer.socialapp.model.IPostLinksMethods;
 import com.omer.socialapp.model.PostOfGroup;
 import com.omer.socialapp.model.PostOfPage;
 import com.omer.socialapp.model.RawPost;
+import com.omer.socialapp.service.IPostService;
 import com.omer.socialapp.service.IPostService.EntityPostType;
-import com.omer.socialapp.service.PostService;
+import com.omer.socialapp.service.ValidationService;
 
 
 @RestController
 public class PostController
 {
-	private final PostService postService;
+	private final IPostService postService;
+	private final ValidationService validationService;
 	
 	
-	public PostController(PostService postService) {
+	@Autowired
+	public PostController(@Qualifier("postService")IPostService postService, ValidationService validationService) {
 		this.postService = postService;
+		this.validationService = validationService;
 	}
 	
 	@GetMapping("/posts/{postId}")
@@ -85,7 +94,14 @@ public class PostController
 	}
 	
 	@PostMapping("/pages/{pageId}/posts")
-	public ResponseEntity<EntityModel<IPostLinksMethods>> addPostOfPage(@PathVariable long pageId, @RequestBody RawPost rawPost) {
+	public ResponseEntity<EntityModel<IPostLinksMethods>> addPostOfPage(@PathVariable long pageId, 
+			@Valid @RequestBody RawPost rawPost, BindingResult bindingResult) {
+		
+		if(bindingResult.hasErrors()) {
+			String errors = validationService.processBindingErrors(bindingResult);
+			throw new IllegalArgumentException(errors);
+		}
+		
 		PostOfPage post = postService.addPostOfPage(pageId, rawPost);
 		URI selfUri = linkTo(methodOn(PostController.class).getPost(post.getId())).toUri();
 		
@@ -119,7 +135,14 @@ public class PostController
 	}
 	
 	@PostMapping("/groups/{groupId}/posts")
-	public ResponseEntity<EntityModel<IPostLinksMethods>> addPostOfGroup(@PathVariable long groupId, @RequestBody RawPost rawPost) {
+	public ResponseEntity<EntityModel<IPostLinksMethods>> addPostOfGroup(@PathVariable long groupId, 
+			@Valid @RequestBody RawPost rawPost, BindingResult bindingResult) {
+		
+		if(bindingResult.hasErrors()) {
+			String errors = validationService.processBindingErrors(bindingResult);
+			throw new IllegalArgumentException(errors);
+		}	
+		
 		PostOfGroup post = postService.addPostOfGroup(groupId, rawPost);
 		URI selfUri = linkTo(methodOn(PostController.class).getPost(post.getId())).toUri();
 		

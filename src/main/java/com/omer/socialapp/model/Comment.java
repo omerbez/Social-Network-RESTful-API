@@ -3,11 +3,15 @@ package com.omer.socialapp.model;
 import java.time.LocalDateTime;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -23,9 +27,13 @@ import lombok.ToString;
 @NoArgsConstructor //For Hibernate
 public class Comment implements ICommentLinksMethods
 {
-	@Id @GeneratedValue
+	@Id 
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotBlank(message = "Post text must have at least 1 character")
+	@Size(max = 250, message = "Post is to long (max length is 250)")
+	@Column(nullable = false)
 	private String text;
 	
 	@JsonIgnore
@@ -42,6 +50,7 @@ public class Comment implements ICommentLinksMethods
 	@JoinColumn(name = "user_id", nullable = false)
 	private User commentedUser;
 	
+	@Column(name = "creation_time", nullable = false)
 	private final LocalDateTime creationTime = LocalDateTime.now();
 	
 	

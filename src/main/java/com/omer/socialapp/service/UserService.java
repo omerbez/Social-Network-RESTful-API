@@ -40,13 +40,12 @@ public class UserService implements IUserService
 
 	@Override
 	public User addUser(User user) {
-		Assert.noNullElements(new Object[]{user, user.getUsername(), user.getEmail(), user.getAge(), user.getDisplayName(),
-				user.getPassword()}, "Some fields are missed!");
+		Assert.noNullElements(new Object[]{user, user.getUsername()}, "User argument is null");
 		
 		if(userRepository.findByUsername(user.getUsername()) != null)
 			throw new IllegalArgumentException("Username "+user.getUsername()+" is already exists!");
 		
-		user = userRepository.save(user); //get the inserted user including the genereted uid..
+		user = userRepository.save(user);
 		return user;
 	}
 
@@ -84,7 +83,7 @@ public class UserService implements IUserService
 	}
 
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public User updateUser(User existsUser, User newUser) {
 		Assert.noNullElements(new Object[] {existsUser, newUser}, "Illegal user info");
 		if(newUser.getUsername() != null) {
@@ -95,10 +94,11 @@ public class UserService implements IUserService
 			
 			existsUser.setUsername(newUser.getUsername());
 		}
+
 		if(newUser.getDisplayName() != null)
 			existsUser.setDisplayName(newUser.getDisplayName());
-		if(newUser.getAge() != null)
-			existsUser.setAge(newUser.getAge());
+		if(newUser.getDateOfBirth() != null)
+			existsUser.setDateOfBirth(newUser.getDateOfBirth());
 		if(newUser.getPassword() != null)
 			existsUser.setPassword(newUser.getPassword());
 		if(newUser.getEmail() != null)
@@ -108,7 +108,7 @@ public class UserService implements IUserService
 	}
 	
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public User updateUser(long existsUserId, User newUser) {
 		User existsUser = userRepository.findById(existsUserId).orElseThrow(() -> 
 				new IllegalArgumentException("User "+existsUserId+" doesn't exists!"));

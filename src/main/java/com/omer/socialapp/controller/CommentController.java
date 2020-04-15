@@ -3,12 +3,15 @@ package com.omer.socialapp.controller;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,16 +23,20 @@ import com.omer.socialapp.exceptions.CommentNotFoundException;
 import com.omer.socialapp.model.ICommentLinksMethods;
 import com.omer.socialapp.model.RawComment;
 import com.omer.socialapp.service.ICommentService;
+import com.omer.socialapp.service.ValidationService;
 
 @RestController
 public class CommentController
 {
 	private ICommentService commentService;
+	private final ValidationService validationService;
 	
 	
 	@Autowired
-	public CommentController(@Qualifier("commentService")ICommentService commentService) {
+	public CommentController(@Qualifier("commentService")ICommentService commentService, 
+			ValidationService validationService) {
 		this.commentService = commentService;
+		this.validationService = validationService;
 	}
 	
 	
@@ -67,7 +74,14 @@ public class CommentController
 	}
 	
 	@PostMapping("/posts/{postId}/comments")
-	public ResponseEntity<EntityModel<ICommentLinksMethods>> addComment(@PathVariable long postId, @RequestBody RawComment rawComment) {
+	public ResponseEntity<EntityModel<ICommentLinksMethods>> addComment(@PathVariable long postId,
+			@Valid @RequestBody RawComment rawComment, BindingResult bindingResult) {
+		
+		if(bindingResult.hasErrors()) {
+			String errors = validationService.processBindingErrors(bindingResult);
+			throw new IllegalArgumentException(errors);
+		}	
+		
 		var comment = commentService.addComment(postId, rawComment);
 		
 		return ResponseEntity.ok()

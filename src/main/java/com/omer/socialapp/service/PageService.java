@@ -9,7 +9,6 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import com.omer.socialapp.adapter.PageEntityModelAdapter;
 import com.omer.socialapp.exceptions.PageNotFoundException;
@@ -27,7 +26,6 @@ public class PageService implements IPageService
 	private PageRepository pageRepository;
 	private PageEntityModelAdapter pageEntityAdapter;
 	private UserRepository userRepository;
-	
 	
 	
 	@Autowired
@@ -59,10 +57,7 @@ public class PageService implements IPageService
 	}
 
 	@Override
-	public PlainPage addPlainPage(PlainPage page) {
-		Assert.noNullElements(new Object[] {page, page.getName(), page.getDescription()}, 
-				"Page name and description are madatory!");
-		
+	public PlainPage addPlainPage(PlainPage page) {		
 		return pageRepository.save(page);
 	}
 	
@@ -76,7 +71,7 @@ public class PageService implements IPageService
 	}
 
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void removePage(long pageId) {
 		var page = findById(pageId).orElseThrow(() -> new PageNotFoundException(pageId));
 		Set<User> likedUsers = page.getLikedUsers();
