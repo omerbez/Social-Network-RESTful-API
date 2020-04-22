@@ -14,7 +14,7 @@ import com.omer.socialapp.model.User;
 
 public interface IPageService {
 	public Optional<AbstractPage> findById(long id);
-	public PlainPage addPlainPage(PlainPage page);
+	public PlainPage addPlainPage(PlainPage page, String username);
 	public List<AbstractPage> getAllPages();
 	public List<User> getUsersOfPage(long pageId);
 	public void removePage(long pageId);

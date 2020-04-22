@@ -15,6 +15,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -64,7 +65,7 @@ public class PageController
 	}
 	
 	@PostMapping("/pages/plain")
-	public ResponseEntity<?> addPlainPage(@RequestBody @Valid PlainPage page,
+	public ResponseEntity<?> addPlainPage(Authentication authentication, @RequestBody @Valid PlainPage page,
 			BindingResult bindingResult) {
 		
 		if(bindingResult.hasErrors()) {
@@ -72,7 +73,7 @@ public class PageController
 			throw new IllegalArgumentException(errors);
 		}
 		
-		page = pageService.addPlainPage(page);  //get created page with real Id
+		page = pageService.addPlainPage(page, authentication.getName());  //get created page with real Id
 		//for the response header.. created (201) response should have a "Location" header with a self link..
 		URI selfUri = linkTo(methodOn(PageController.class).getPage(page.getId())).toUri();
 		return ResponseEntity.created(selfUri).body(pageService.toEntityModel(new PageBasicDTO(page)));

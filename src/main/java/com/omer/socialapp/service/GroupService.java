@@ -9,10 +9,10 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import com.omer.socialapp.adapter.GroupEntityModelAdapter;
 import com.omer.socialapp.exceptions.GroupNotFoundException;
+import com.omer.socialapp.exceptions.UserNotFoundException;
 import com.omer.socialapp.model.Group;
 import com.omer.socialapp.model.IGroupLinksMethods;
 import com.omer.socialapp.model.User;
@@ -58,10 +58,9 @@ public class GroupService implements IGroupService
 	}
 
 	@Override
-	public Group addGroup(Group group) {
-		Assert.noNullElements(new Object[] {group, group.getGroupName(), group.getDescription()}, 
-				"Group name and description are madatory!");
-		
+	public Group addGroup(Group group, String username) {
+		User owner = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+		group.setOwnerUser(owner);
 		return groupRepository.save(group);
 	}
 

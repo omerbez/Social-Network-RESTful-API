@@ -64,7 +64,7 @@ public class PostService implements IPostService
 		AbstractPage page = pageRepository.findById(pageId).orElseThrow(() -> new PageNotFoundException(pageId));
 		User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 		
-		if(!user.isRegisteredIn(page))
+		if(!user.isLikePage(page))
 			throw new GeneralException("User "+userId+" is not registered to page "+pageId+" and cannot post");
 		
 		return postRepository.save(new PostOfPage(rawPost.getText(), user, page));

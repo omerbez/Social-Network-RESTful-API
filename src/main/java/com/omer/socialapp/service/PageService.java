@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.omer.socialapp.adapter.PageEntityModelAdapter;
 import com.omer.socialapp.exceptions.PageNotFoundException;
+import com.omer.socialapp.exceptions.UserNotFoundException;
 import com.omer.socialapp.model.AbstractPage;
 import com.omer.socialapp.model.IPageLinksMethods;
 import com.omer.socialapp.model.PlainPage;
@@ -57,7 +58,9 @@ public class PageService implements IPageService
 	}
 
 	@Override
-	public PlainPage addPlainPage(PlainPage page) {		
+	public PlainPage addPlainPage(PlainPage page, String username) {
+		User owner = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+		page.setOwnerUser(owner);
 		return pageRepository.save(page);
 	}
 	

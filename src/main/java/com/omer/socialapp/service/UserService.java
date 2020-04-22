@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -16,6 +17,7 @@ import com.omer.socialapp.model.AbstractPage;
 import com.omer.socialapp.model.Group;
 import com.omer.socialapp.model.IUserLinksMethods;
 import com.omer.socialapp.model.User;
+import com.omer.socialapp.model.UserRegistrationRequestParams;
 import com.omer.socialapp.repository.GroupRepository;
 import com.omer.socialapp.repository.PageRepository;
 import com.omer.socialapp.repository.UserRepository;
@@ -28,25 +30,26 @@ public class UserService implements IUserService
 	private final UserEntityModelAdapter userModelAdapter;
 	private final PageRepository pageRepository;
 	private final GroupRepository groupRepository;
+	private final PasswordEncoder passwordEncoder;
+	
 	
 	@Autowired
 	public UserService(UserRepository repo, UserEntityModelAdapter modelAdapter,
-			PageRepository pageRepo, GroupRepository groupRepository) {
+			PageRepository pageRepo, GroupRepository groupRepository, PasswordEncoder passwordEncoder) {
 		userRepository = repo;
 		userModelAdapter = modelAdapter;
 		pageRepository = pageRepo;
 		this.groupRepository = groupRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
+	
 	@Override
-	public User addUser(User user) {
-		Assert.noNullElements(new Object[]{user, user.getUsername()}, "User argument is null");
+	public User addUser(UserRegistrationRequestParams userForm) {
+		User user = User.createFrom(userForm, passwordEncoder);
 		
-		if(userRepository.findByUsername(user.getUsername()) != null)
-			throw new IllegalArgumentException("Username "+user.getUsername()+" is already exists!");
-		
-		user = userRepository.save(user);
-		return user;
+		// JPA validation..
+		return userRepository.save(user);
 	}
 
 	@Override
@@ -86,8 +89,10 @@ public class UserService implements IUserService
 	@Transactional(rollbackFor = Exception.class)
 	public User updateUser(User existsUser, User newUser) {
 		Assert.noNullElements(new Object[] {existsUser, newUser}, "Illegal user info");
-		if(newUser.getUsername() != null) {
-			User user = userRepository.findByUsername(newUser.getUsername());
+		
+		// if the user wants to change username
+		if(newUser.getUsername() != existsUser.getUsername()) {
+			User user = userRepository.findByUsername(newUser.getUsername()).orElse(null);
 			//user with same username exists and it's not the current exists user (different id)
 			if(user != null && user.getId() != existsUser.getId())
 				throw new IllegalArgumentException("Username "+newUser.getUsername()+" already exists!");
@@ -95,25 +100,27 @@ public class UserService implements IUserService
 			existsUser.setUsername(newUser.getUsername());
 		}
 
-		if(newUser.getDisplayName() != null)
-			existsUser.setDisplayName(newUser.getDisplayName());
-		if(newUser.getDateOfBirth() != null)
-			existsUser.setDateOfBirth(newUser.getDateOfBirth());
-		if(newUser.getPassword() != null)
-			existsUser.setPassword(newUser.getPassword());
-		if(newUser.getEmail() != null)
-			existsUser.setEmail(newUser.getEmail());
+
+		existsUser.setDisplayName(newUser.getDisplayName());
+		existsUser.setDateOfBirth(newUser.getDateOfBirth());
+		existsUser.setPassword(newUser.getPassword());
+		existsUser.setEmail(newUser.getEmail());
 		
 		return existsUser;
 	}
 	
 	@Override
-	@Transactional(rollbackFor = Exception.class)
 	public User updateUser(long existsUserId, User newUser) {
 		User existsUser = userRepository.findById(existsUserId).orElseThrow(() -> 
 				new IllegalArgumentException("User "+existsUserId+" doesn't exists!"));
 		
 		return updateUser(existsUser, newUser);
+	}
+	
+
+	@Override
+	public User updateUser(long existsUserId, UserRegistrationRequestParams newUser) {
+		return updateUser(existsUserId, User.createFrom(newUser, passwordEncoder));
 	}
 
 	@Override

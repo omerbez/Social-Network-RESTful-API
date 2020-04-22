@@ -15,6 +15,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -67,13 +68,15 @@ public class GroupController
 	}
 	
 	@PostMapping("/groups")
-	public ResponseEntity<EntityModel<IGroupLinksMethods>> addGroup(@Valid @RequestBody Group group, BindingResult bindingResult) {
+	public ResponseEntity<EntityModel<IGroupLinksMethods>> addGroup(Authentication authentication,
+			@Valid @RequestBody Group group, BindingResult bindingResult) {
 		
 		if(bindingResult.hasErrors()) {
 			String errors = validationService.processBindingErrors(bindingResult);
 			throw new IllegalArgumentException(errors);
-		}		
-		group = groupService.addGroup(group);  //get created page with real Id
+		}
+		
+		group = groupService.addGroup(group, authentication.getName()); 
 		//for the response header.. created (201) response should have a "Location" header with a self link..
 		URI selfUri = linkTo(methodOn(GroupController.class).getGroup(group.getId())).toUri();
 		return ResponseEntity.created(selfUri).body(groupService.toEntityModel(new GroupBasicDTO(group)));

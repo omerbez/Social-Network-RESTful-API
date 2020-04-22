@@ -12,7 +12,7 @@ import com.omer.socialapp.model.User;
 
 public interface IGroupService {
 	public Optional<Group> findById(long id);
-	public Group addGroup(Group group);
+	public Group addGroup(Group group, String username);
 	public List<Group> getAllGroups();
 	public List<Group> getAllGroups(String name, String descContains);
 	public List<User> getUsersOfGroup(long groupId);

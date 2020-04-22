@@ -38,4 +38,8 @@ public class GroupBasicDTO implements IGroupLinksMethods
 	public String getDescription() {
 		return group.getDescription();
 	}
+	
+	public String getOwnerUsername() {
+		return group.getOwnerUsername();
+	}
 }

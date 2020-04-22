@@ -3,11 +3,15 @@ package com.omer.socialapp.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -18,14 +22,19 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.PreRemove;
+import javax.persistence.Transient;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.Assert;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.omer.socialapp.service.ValidationService.Password;
+import com.omer.socialapp.validation.Password;
+import com.omer.socialapp.validation.Username;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -48,29 +57,41 @@ public class User implements IUserLinksMethods
 	@Column(name = "display_name", nullable = false)
 	@Size(min = 3, max = 15, message = "Display name length must be 3 to 15")
 	@Pattern(regexp = "\\w+( \\w+)*", message = "Illegal display name")
+	@EqualsAndHashCode.Exclude
 	private String displayName;
 	
-	@NotNull(message = "Username is mandatory")
-	@Column(unique = true, nullable = false)
-	@Size(min = 4, max = 12, message = "Username length must be between 4 to 12")
-	@Pattern(regexp = "\\w+", message = "Illegal username (no whitespaces allowed")
+	@Username
+	@Column(name = "username", nullable = false, unique = true)
+	@EqualsAndHashCode.Exclude
 	private String username;
 	
-	@NotNull(message = "Password is mandatory")
-	@Column(nullable = false)
-	@Password(min = 8, max = 15, message = "Illegal password")
+	// The Hibernate validation will be on the confirmedPassword only - (because the real password
+	// is encrypted..) the presentation layer will validate the entire User (by decoupling the User Entity
+	// from the registration form) - separate class UserRegistrationRequestParams.
+	@Column(name = "password", nullable = false)
+	@EqualsAndHashCode.Exclude
 	private String password;
+	
+	@Transient
+	@Getter(value = AccessLevel.NONE) // JSON deserialization only..
+	@Password
+	@EqualsAndHashCode.Exclude
+	private String confirmedPassword;
 	
 	@Column(nullable = false)
 	@Email(message = "Illegal email address")
 	@NotNull(message = "Email is mandatory")
+	@EqualsAndHashCode.Exclude
 	private String email;
 	
 	@Column(name = "date_of_birth", nullable = false)
 	@Past
+	@NotNull(message = "Date of birth is mandatory!")
+	@EqualsAndHashCode.Exclude
 	private LocalDate dateOfBirth;
 	
 	@Column(name = "creation_date", nullable = false)
+	@EqualsAndHashCode.Exclude
 	private final LocalDateTime creationDate = LocalDateTime.now();
 	
 	@JsonIgnore
@@ -105,7 +126,6 @@ public class User implements IUserLinksMethods
 	@OneToMany(mappedBy = "postedUser", cascade = CascadeType.ALL)
 	private Set<AbstractPost> posts;
 	
-	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude 
 	@ToString.Exclude
@@ -116,7 +136,13 @@ public class User implements IUserLinksMethods
 	   inverseJoinColumns = @JoinColumn(name="page_id", referencedColumnName="id"))
 	private Set<AbstractPage> likedPages;
 	
-	@JsonIgnore
+
+	@Setter(value = AccessLevel.NONE)
+	@EqualsAndHashCode.Exclude 
+	@ToString.Exclude
+	@OneToMany(mappedBy = "ownerUser", cascade = CascadeType.ALL)
+	private Set<AbstractPage> ownedPages;
+	
 	@Setter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude 
 	@ToString.Exclude
@@ -127,6 +153,12 @@ public class User implements IUserLinksMethods
 	   inverseJoinColumns = @JoinColumn(name="group_id", referencedColumnName="id"))
 	private Set<Group> groups;
 	
+	@Setter(value = AccessLevel.NONE)
+	@EqualsAndHashCode.Exclude 
+	@ToString.Exclude
+	@OneToMany(mappedBy = "ownerUser", cascade = CascadeType.ALL)
+	private Set<Group> ownedGroups;
+	
 	@JsonIgnore
 	@Setter(value = AccessLevel.NONE)
 	@EqualsAndHashCode.Exclude 
@@ -134,19 +166,54 @@ public class User implements IUserLinksMethods
 	@OneToMany(mappedBy = "commentedUser", cascade = CascadeType.ALL)
 	private Set<Comment> comments;
 	
+	/**
+	 * User Roles and Authorities
+	 */
+	@JsonIgnore
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name =  "user_roles", joinColumns = @JoinColumn(name="user_id", referencedColumnName = "id"))
+	@Column(name = "role") // the name in the other table - "user_roles"
+	@EqualsAndHashCode.Exclude @ToString.Exclude
+	private List<String> roles = new ArrayList<>();
 	
-	public User(String displayname, String username, String password, String email, LocalDate dateOfBirth) {
+	@JsonIgnore
+	@Column(name = "activated", nullable = false)
+	@EqualsAndHashCode.Exclude 
+	@ToString.Exclude
+	@Setter(value = AccessLevel.NONE)
+	@Getter(value = AccessLevel.NONE)
+    private boolean accountActive = true;
+    
+	
+	public User(String displayname, String username, String password, String email, LocalDate dateOfBirth, 
+			List<String> roles, PasswordEncoder passwordEncoder) {
+		Assert.noNullElements(new Object[] {displayname, username, password, email, dateOfBirth, roles, passwordEncoder},
+				"One or more of the user's fields are missing!");
+		
 		this.displayName = displayname;
 		this.username = username;
-		this.password = password;
+		this.password = passwordEncoder.encode(password);
+		this.confirmedPassword = password;
 		this.email = email;
 		this.dateOfBirth = dateOfBirth;
+		this.roles = roles;
 		
 		// calculate the age..
-		Period p = Period.between(LocalDate.now(), dateOfBirth);
+		Period p = Period.between(dateOfBirth, LocalDate.now());
 		age = p.getYears();
 	}
 	
+	/**
+	 * Creates a regular ready-to-persist User entity - with a normal authorities (no roles)
+	 * @param userForm validated params - must not be null.
+	 * @param passwordEncoder the password encoder - must not be null.
+	 */
+	public static User createFrom(UserRegistrationRequestParams userForm, PasswordEncoder passwordEncoder) {
+		// simple factory method - in order to have logic/validations before delefation the creation to the constructor
+		assert userForm != null && passwordEncoder != null;
+		return new User(userForm.getDisplayName(), userForm.getUsername(), userForm.getPassword(), userForm.getEmail(),
+				userForm.getDateOfBirth(), new ArrayList<>(), passwordEncoder);
+	}
 	
 	public void addFriend(User friend) {
 		assert friend != null;
@@ -194,14 +261,46 @@ public class User implements IUserLinksMethods
 		posts.add(post);
 	}
 	
-	public boolean isRegisteredIn(AbstractPage page) {
+	public boolean isLikePage(AbstractPage page) {
 		assert page != null;
-		return likedPages.contains(page);
+		return isLikePage(page.getId());
 	}
 	
 	public boolean isRegisteredIn(Group group) {
 		assert group != null;
-		return groups.contains(group);
+		return isRegisteredIn(group.getId());
+	}
+	
+	public boolean isRegisteredIn(long groupId) {
+		
+		for(Group group : groups) {
+			if(group.getId().longValue() == groupId)
+				return true;
+		}
+		
+		for(Group group : ownedGroups) {
+			if(group.getId().longValue() == groupId)
+				return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isLikePage(long pageId) {
+		if(likedPages == null)
+			return false;
+		
+		for(AbstractPage page : likedPages) {
+			if(page.getId().longValue() == pageId)
+				return true;
+		}
+		
+		for(AbstractPage page : ownedPages) {
+			if(page.getId().longValue() == pageId)
+				return true;
+		}
+		
+		return false;
 	}
 	
 	@PreRemove 
@@ -212,5 +311,25 @@ public class User implements IUserLinksMethods
 		addedByFriendsList.forEach(user -> user.removeFriend(this));
 		likedPages.clear();
 		groups.clear();
+	}
+	
+	public boolean isAccountActive() {
+		return accountActive;
+	}
+	
+	public boolean isOwnerOfGroup(long groupId) {
+		for(Group group : ownedGroups) {
+			if(group.getId() == groupId)
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isOwnerOfPage(long pageId) {
+		for(AbstractPage page : ownedPages) {
+			if(page.getId() == pageId)
+				return true;
+		}
+		return false;
 	}
 }

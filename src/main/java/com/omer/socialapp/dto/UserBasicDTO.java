@@ -18,7 +18,7 @@ import lombok.Value;
 //the default is classnameList..
 @Relation(collectionRelation = "usersList", itemRelation = "user") 
 @Value
-@JsonPropertyOrder(value = {"id", "displayName", "email", "age"})
+@JsonPropertyOrder(value = {"id", "username", "displayName", "email", "age"})
 public class UserBasicDTO implements IUserLinksMethods
 {
 	@JsonIgnore
@@ -31,6 +31,10 @@ public class UserBasicDTO implements IUserLinksMethods
 	
 	public Long getId() {
 		return user.getId();
+	}
+	
+	public String getUsername() {
+		return user.getUsername();
 	}
 	
 	public String getDisplayName() {

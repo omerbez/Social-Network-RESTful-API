@@ -10,13 +10,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,7 +38,7 @@ public abstract class AbstractPage implements IPageLinksMethods
 	@Column(nullable = false)
 	@EqualsAndHashCode.Exclude
 	@Size(min = 4, max = 25, message = "Page name length must be between 4 to 25")
-	@Pattern(regexp = "\\w+( \\w)*", message = "Illegal page name")
+	@Pattern(regexp = "\\w+( \\w+)*", message = "Illegal page name")
 	private String name;
 	
 	
@@ -44,6 +47,12 @@ public abstract class AbstractPage implements IPageLinksMethods
 	@Column(nullable = false)
 	@EqualsAndHashCode.Exclude
 	private String description = "";  // default value for the field..
+	
+	@JsonIgnore
+	@EqualsAndHashCode.Exclude @ToString.Exclude
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+	@JoinColumn(name = "owner_user", nullable = false)
+	private User ownerUser;
 	
 	@JsonIgnore
 	@EqualsAndHashCode.Exclude @ToString.Exclude
@@ -57,13 +66,18 @@ public abstract class AbstractPage implements IPageLinksMethods
 	private Set<PostOfPage> pagePosts;
 	
 	
-	public AbstractPage(String name, String description) {
+	public AbstractPage(String name, String description, User owner) {
 		this.name = name;
+		this.ownerUser = owner;
 		if(description != null)
 			this.description = description;
 	}
 	
 	AbstractPage() {
 		// Default constructor for Hibernate and Jackson deserialize
+	}
+	
+	public String getOwnerUsername() {
+		return ownerUser.getUsername();
 	}
 }

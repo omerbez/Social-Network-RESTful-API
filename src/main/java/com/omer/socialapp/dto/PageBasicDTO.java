@@ -38,4 +38,8 @@ public class PageBasicDTO implements IPageLinksMethods
 	public String getDescription() {
 		return page.getDescription();
 	}
+	
+	public String getOwnerUsername() {
+		return page.getOwnerUsername();
+	}
 }

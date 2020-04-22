@@ -11,8 +11,8 @@ public class PlainPage extends AbstractPage
 		// Default constructor for Hibernate and Jackson deserialize
 	}
 	
-	public PlainPage(String name, String description) {
-		super(name, description);
+	public PlainPage(String name, String description, User owner) {
+		super(name, description, owner);
 	}
 	
 	@Override

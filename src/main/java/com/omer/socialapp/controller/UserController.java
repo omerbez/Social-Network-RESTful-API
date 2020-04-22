@@ -32,6 +32,7 @@ import com.omer.socialapp.exceptions.UserNotFoundException;
 import com.omer.socialapp.model.IUserLinksMethods;
 import com.omer.socialapp.model.Identifier;
 import com.omer.socialapp.model.User;
+import com.omer.socialapp.model.UserRegistrationRequestParams;
 import com.omer.socialapp.service.IGroupService;
 import com.omer.socialapp.service.IPageService;
 import com.omer.socialapp.service.IUserService;
@@ -71,13 +72,15 @@ public class UserController
 	}
 	
 	@PostMapping("/users")
-	public ResponseEntity<EntityModel<IUserLinksMethods>> addUser(@Valid @RequestBody User user, BindingResult bindingResult) {		
+	public ResponseEntity<EntityModel<IUserLinksMethods>> addUser(@Valid @RequestBody UserRegistrationRequestParams userForm, 
+			BindingResult bindingResult) {
+		
 		if(bindingResult.hasErrors()) {
 			String errors = validationService.processBindingErrors(bindingResult);
 			throw new IllegalArgumentException(errors);
 		}	
 		
-		user = userService.addUser(user); //get created user with real Id
+		User user = userService.addUser(userForm); //get created user with real Id
 		//for the response header.. created (201) response should have a "Location" header with a self link..
 		URI selfUri = linkTo(methodOn(UserController.class).getSingleUser(user.getId())).toUri();
 		return ResponseEntity.created(selfUri).body(userService.toEntityModel(new UserBasicDTO(user)));
@@ -101,13 +104,19 @@ public class UserController
     }
 	
 	@PutMapping("/users/{uid}")
-    public ResponseEntity<?> updateOrCreateUser(@PathVariable long uid, @RequestBody User newUser) {
+    public ResponseEntity<?> updateOrCreateUser(@PathVariable long uid, @Valid @RequestBody UserRegistrationRequestParams newUser,
+    		BindingResult bindingResult) {
 		
-		if(userService.isExists(uid)) {
-			//newUser fields are optionals and some of them may be null when deserialize by Jackson!			
+		if(bindingResult.hasErrors()) {
+			String errors = validationService.processBindingErrors(bindingResult);
+			throw new IllegalArgumentException(errors);
+		}	
+		
+		if(userService.isExists(uid)) {			
 			User updatedUser = userService.updateUser(uid, newUser);
             return ResponseEntity.ok(userService.toEntityModel(new UserBasicDTO(updatedUser)));         
 		} 
+		
 		//else - create a new user and return http 201 response.
 		User user = userService.addUser(newUser);
 		URI selfUri = linkTo(methodOn(UserController.class).getSingleUser(user.getId())).toUri();
