@@ -49,14 +49,12 @@ public class CommentService implements ICommentService
 	}
 
 	@Override
-	public Comment addComment(long postId, RawComment rawComment) {
-		Assert.noNullElements(new Object[] {rawComment, rawComment.getCommentedUserId(), rawComment.getText()}, 
+	public Comment addComment(long postId, RawComment rawComment, String username) {
+		Assert.noNullElements(new Object[] {rawComment, username, rawComment.getText()}, 
 				"Illegal request arguments");
 		Assert.hasLength(rawComment.getText(), "Comment text must contain al least 1 character");
-		
-		long userId = rawComment.getCommentedUserId().longValue();		
-		User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-		
+			
+		User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));		
 		AbstractPost post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
 		
 		// Check if user is allowed to comment on the post..
@@ -64,12 +62,12 @@ public class CommentService implements ICommentService
 			PostOfPage pagePost = (PostOfPage)post;
 			Set<User> registeredUsers = pagePost.getRelatedPage().getLikedUsers();
 			if(!registeredUsers.contains(user))
-				throw new GeneralException("User "+userId+" is not registered to the page so he can't comment on the desired post");
+				throw new GeneralException("User "+user.getId()+" is not registered to the page so he can't comment on the desired post");
 		} else {
 			PostOfGroup groupPost = (PostOfGroup)post;
 			Set<User> registeredUsers = groupPost.getRelatedGroup().getGroupUsers();
 			if(!registeredUsers.contains(user))
-				throw new GeneralException("User "+userId+" is not registered to the group so he can't comment on the desired post");
+				throw new GeneralException("User "+user.getId()+" is not registered to the group so he can't comment on the desired post");
 		}
 		
 		return commentRepository.save(new Comment(rawComment.getText(), post, user));

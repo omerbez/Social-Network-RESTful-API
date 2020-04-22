@@ -11,6 +11,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -74,7 +75,7 @@ public class CommentController
 	}
 	
 	@PostMapping("/posts/{postId}/comments")
-	public ResponseEntity<EntityModel<ICommentLinksMethods>> addComment(@PathVariable long postId,
+	public ResponseEntity<EntityModel<ICommentLinksMethods>> addComment(@PathVariable long postId, Authentication auth,
 			@Valid @RequestBody RawComment rawComment, BindingResult bindingResult) {
 		
 		if(bindingResult.hasErrors()) {
@@ -82,7 +83,8 @@ public class CommentController
 			throw new IllegalArgumentException(errors);
 		}	
 		
-		var comment = commentService.addComment(postId, rawComment);
+		String username = auth.getName();
+		var comment = commentService.addComment(postId, rawComment, username);
 		
 		return ResponseEntity.ok()
 				.cacheControl(CacheControl.maxAge(60, TimeUnit.MINUTES))

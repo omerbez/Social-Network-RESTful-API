@@ -71,13 +71,21 @@ public class Group
 	private User ownerUser;
 	
 	
-	public Group(String groupName, String description) {
+	public Group(String groupName, String description, User owner) {
+		this.ownerUser = owner;
 		this.groupName = groupName;
 		if(description != null)
 			this.description = description;
+		
+		groupUsers.add(owner);
 	}
 	
 	public String getOwnerUsername() {
 		return ownerUser.getUsername();
+	}
+	
+	public Set<User> getGroupUsers() {
+		groupUsers.add(ownerUser);
+		return groupUsers;
 	}
 }

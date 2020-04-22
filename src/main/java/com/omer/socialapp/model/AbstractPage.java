@@ -71,6 +71,8 @@ public abstract class AbstractPage implements IPageLinksMethods
 		this.ownerUser = owner;
 		if(description != null)
 			this.description = description;
+		
+		likedUsers.add(owner);
 	}
 	
 	AbstractPage() {
@@ -79,5 +81,10 @@ public abstract class AbstractPage implements IPageLinksMethods
 	
 	public String getOwnerUsername() {
 		return ownerUser.getUsername();
+	}
+	
+	public Set<User> getLikedUsers() {
+		likedUsers.add(ownerUser);
+		return likedUsers; // copy of the reference..
 	}
 }

@@ -56,16 +56,15 @@ public class PostService implements IPostService
 	}
 	
 	@Override
-	public PostOfPage addPostOfPage(long pageId, RawPost rawPost) {
-		Assert.noNullElements(new Object[] {rawPost, rawPost.getText(), rawPost.getPostedUserId()}, "Illegal post param");
+	public PostOfPage addPostOfPage(long pageId, RawPost rawPost, String username) {
+		Assert.noNullElements(new Object[] {rawPost, rawPost.getText(), username}, "Illegal post param");
 		Assert.hasText(rawPost.getText(), "Post's text is illegal");
 		
-		long userId = rawPost.getPostedUserId();
 		AbstractPage page = pageRepository.findById(pageId).orElseThrow(() -> new PageNotFoundException(pageId));
-		User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+		User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
 		
 		if(!user.isLikePage(page))
-			throw new GeneralException("User "+userId+" is not registered to page "+pageId+" and cannot post");
+			throw new GeneralException("User "+user.getId()+" is not registered to page "+pageId+" and cannot post");
 		
 		return postRepository.save(new PostOfPage(rawPost.getText(), user, page));
 	}
@@ -110,16 +109,15 @@ public class PostService implements IPostService
 	}
 
 	@Override
-	public PostOfGroup addPostOfGroup(long groupId, RawPost rawPost) {
-		Assert.noNullElements(new Object[] {rawPost, rawPost.getText(), rawPost.getPostedUserId()}, "Illegal post param");
+	public PostOfGroup addPostOfGroup(long groupId, RawPost rawPost, String username) {
+		Assert.noNullElements(new Object[] {rawPost, rawPost.getText(), username}, "Illegal post param");
 		Assert.hasText(rawPost.getText(), "Post's text is illegal");
 		
-		long userId = rawPost.getPostedUserId();
 		Group group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-		User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+		User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
 		
 		if(!user.isRegisteredIn(group))
-			throw new GeneralException("User "+userId+" is not registered to group "+group.getId()+" and cannot post");
+			throw new GeneralException("User "+user.getId()+" is not registered to group "+group.getId()+" and cannot post");
 			
 		return postRepository.save(new PostOfGroup(rawPost.getText(), user, group));
 	}

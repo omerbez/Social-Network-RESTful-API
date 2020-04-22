@@ -14,7 +14,7 @@ public interface ICommentService {
 	public List<Comment> getCommentsOfPost(long postId);
 	public List<Comment> getCommentsOfUser(long userId);
 	public Optional<Comment> getCommentById(long id);
-	public Comment addComment(long postId, RawComment rawComment);
+	public Comment addComment(long postId, RawComment rawComment, String username);
 	public EntityModel<ICommentLinksMethods> toEntityModel(ICommentLinksMethods comment);
 	public CollectionModel<EntityModel<ICommentLinksMethods>> toCollectionModel(Iterable<? extends ICommentLinksMethods> comments);
 }

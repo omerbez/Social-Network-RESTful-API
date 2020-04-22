@@ -33,6 +33,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.omer.socialapp.validation.Password;
 import com.omer.socialapp.validation.Username;
 
@@ -61,6 +63,7 @@ public class User implements IUserLinksMethods
 	private String displayName;
 	
 	@Username
+	@Setter(value = AccessLevel.NONE)
 	@Column(name = "username", nullable = false, unique = true)
 	@EqualsAndHashCode.Exclude
 	private String username;
@@ -73,9 +76,9 @@ public class User implements IUserLinksMethods
 	private String password;
 	
 	@Transient
-	@Getter(value = AccessLevel.NONE) // JSON deserialization only..
 	@Password
 	@EqualsAndHashCode.Exclude
+	@JsonProperty(access = Access.WRITE_ONLY) // deserialization only..
 	private String confirmedPassword;
 	
 	@Column(nullable = false)
@@ -94,7 +97,7 @@ public class User implements IUserLinksMethods
 	@EqualsAndHashCode.Exclude
 	private final LocalDateTime creationDate = LocalDateTime.now();
 	
-	@JsonIgnore
+	@JsonIgnore()
 	@EqualsAndHashCode.Exclude @ToString.Exclude
 	@Setter(AccessLevel.NONE)
 	// calculated from dateOfBirth, should also be in the DB for queries pruporse..

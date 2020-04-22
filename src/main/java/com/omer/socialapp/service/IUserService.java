@@ -19,8 +19,6 @@ public interface IUserService {
 	public List<User> getAllUsers(String name, Integer age);
 	public boolean isExists(long uid);
 	public void deleteUser(long uid);
-	public User updateUser(User existsUser, User newUser);
-	public User updateUser(long existsUserId, User newUser);
 	public User updateUser(long existsUserId, UserRegistrationRequestParams newUser);
 	public boolean checkIfFriends(long uid1, long uid2);
 	public List<AbstractPage> getUserPages(long uid); 

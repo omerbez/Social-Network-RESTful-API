@@ -15,6 +15,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -94,7 +95,7 @@ public class PostController
 	}
 	
 	@PostMapping("/pages/{pageId}/posts")
-	public ResponseEntity<EntityModel<IPostLinksMethods>> addPostOfPage(@PathVariable long pageId, 
+	public ResponseEntity<EntityModel<IPostLinksMethods>> addPostOfPage(@PathVariable long pageId, Authentication auth, 
 			@Valid @RequestBody RawPost rawPost, BindingResult bindingResult) {
 		
 		if(bindingResult.hasErrors()) {
@@ -102,7 +103,8 @@ public class PostController
 			throw new IllegalArgumentException(errors);
 		}
 		
-		PostOfPage post = postService.addPostOfPage(pageId, rawPost);
+		String username = auth.getName();
+		PostOfPage post = postService.addPostOfPage(pageId, rawPost, username);
 		URI selfUri = linkTo(methodOn(PostController.class).getPost(post.getId())).toUri();
 		
 		return ResponseEntity.created(selfUri)
@@ -135,7 +137,7 @@ public class PostController
 	}
 	
 	@PostMapping("/groups/{groupId}/posts")
-	public ResponseEntity<EntityModel<IPostLinksMethods>> addPostOfGroup(@PathVariable long groupId, 
+	public ResponseEntity<EntityModel<IPostLinksMethods>> addPostOfGroup(@PathVariable long groupId, Authentication auth,
 			@Valid @RequestBody RawPost rawPost, BindingResult bindingResult) {
 		
 		if(bindingResult.hasErrors()) {
@@ -143,7 +145,8 @@ public class PostController
 			throw new IllegalArgumentException(errors);
 		}	
 		
-		PostOfGroup post = postService.addPostOfGroup(groupId, rawPost);
+		String username = auth.getName();
+		PostOfGroup post = postService.addPostOfGroup(groupId, rawPost, username);
 		URI selfUri = linkTo(methodOn(PostController.class).getPost(post.getId())).toUri();
 		
 		return ResponseEntity.created(selfUri)

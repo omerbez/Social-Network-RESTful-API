@@ -12,8 +12,8 @@ import com.omer.socialapp.model.PostOfPage;
 import com.omer.socialapp.model.RawPost;
 
 public interface IPostService {
-	public PostOfPage addPostOfPage(long pageId, RawPost rawPost);
-	public PostOfGroup addPostOfGroup(long groupId, RawPost rawPost);
+	public PostOfPage addPostOfPage(long pageId, RawPost rawPost, String username);
+	public PostOfGroup addPostOfGroup(long groupId, RawPost rawPost, String username);
 	public AbstractPost getPost(long postId);
 	public List<PostOfPage> getUserPostsOfPage(long pageId, long userId);
 	public List<PostOfGroup> getUserPostsOfGroup(long groupId, long userId);

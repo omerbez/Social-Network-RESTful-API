@@ -9,7 +9,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import com.omer.socialapp.adapter.UserEntityModelAdapter;
 import com.omer.socialapp.exceptions.UserNotFoundException;
@@ -85,42 +84,30 @@ public class UserService implements IUserService
 		userRepository.deleteById(uid);
 	}
 
+
+	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public User updateUser(User existsUser, User newUser) {
-		Assert.noNullElements(new Object[] {existsUser, newUser}, "Illegal user info");
+	public User updateUser(long existsUserId, UserRegistrationRequestParams newUser) {
 		
-		// if the user wants to change username
-		if(newUser.getUsername() != existsUser.getUsername()) {
-			User user = userRepository.findByUsername(newUser.getUsername()).orElse(null);
-			//user with same username exists and it's not the current exists user (different id)
-			if(user != null && user.getId() != existsUser.getId())
-				throw new IllegalArgumentException("Username "+newUser.getUsername()+" already exists!");
-			
-			existsUser.setUsername(newUser.getUsername());
+		User existsUser = userRepository.findById(existsUserId).orElseThrow(() -> new UserNotFoundException(existsUserId));
+		
+		// Check which fiels the user wants to update. (the username must not be changed..)
+		if(newUser.getDisplayName() != null)
+			existsUser.setDisplayName(newUser.getDisplayName());
+		
+		if(newUser.getDateOfBirth() != null)
+			existsUser.setDateOfBirth(newUser.getDateOfBirth());
+		
+		if(newUser.getPassword() != null) {
+			existsUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+			existsUser.setConfirmedPassword(newUser.getConfirmedPassword());
 		}
-
-
-		existsUser.setDisplayName(newUser.getDisplayName());
-		existsUser.setDateOfBirth(newUser.getDateOfBirth());
-		existsUser.setPassword(newUser.getPassword());
-		existsUser.setEmail(newUser.getEmail());
+		
+		if(newUser.getEmail() != null)
+			existsUser.setEmail(newUser.getEmail());
 		
 		return existsUser;
-	}
-	
-	@Override
-	public User updateUser(long existsUserId, User newUser) {
-		User existsUser = userRepository.findById(existsUserId).orElseThrow(() -> 
-				new IllegalArgumentException("User "+existsUserId+" doesn't exists!"));
-		
-		return updateUser(existsUser, newUser);
-	}
-	
-
-	@Override
-	public User updateUser(long existsUserId, UserRegistrationRequestParams newUser) {
-		return updateUser(existsUserId, User.createFrom(newUser, passwordEncoder));
 	}
 
 	@Override
